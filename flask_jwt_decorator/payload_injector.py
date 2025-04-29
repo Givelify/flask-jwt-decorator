@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from flask_jwt_middleware.parsed_token import ParsedToken
+from flask_jwt_decorator.parsed_token import ParsedToken
 
 
 

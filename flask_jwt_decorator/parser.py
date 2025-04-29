@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import jwt
+from flask import current_app
 from jwt import ExpiredSignatureError, InvalidTokenError
 
-from flask_jwt_middleware.parsed_token import ParsedToken
+from flask_jwt_decorator.parsed_token import ParsedToken
 
 
 class TokenParser(ABC):
@@ -15,10 +15,11 @@ class TokenParser(ABC):
 
 class DefaultJWTParser(TokenParser):
 
-    # TODO we want to grab these values from some dynamic config on client part
-    def __init__(self, secret_key: str, algorithms: list[str] = ["HS256"]):
-        self.secret_key = secret_key
-        self.algorithms = algorithms
+    def __init__(self):
+        self.secret_key = current_app.config["JWT_SECRET_KEY"]
+        if not self.secret_key:
+            raise ValueError("JWT_SECRET_KEY is required in the configuration")
+        self.algorithms = current_app.config.get("JWT_ALGORITHMS", ["HS256"])
 
     def parse(self, token: str) -> ParsedToken:
         try:

@@ -2,12 +2,9 @@ from functools import wraps
 
 from flask import abort, request
 
-from flask_jwt_middleware.parser import DefaultJWTParser, TokenParser
-from flask_jwt_middleware.payload_injector import (
-    DefaultPayloadInjector,
-    PayloadInjector,
-)
-from flask_jwt_middleware.validators import DefaultJWTValidator, TokenValidator
+from flask_jwt_decorator.parser import DefaultJWTParser, TokenParser
+from flask_jwt_decorator.payload_injector import DefaultPayloadInjector, PayloadInjector
+from flask_jwt_decorator.validators import DefaultJWTValidator, TokenValidator
 
 
 def get_auth_header_token(req):
