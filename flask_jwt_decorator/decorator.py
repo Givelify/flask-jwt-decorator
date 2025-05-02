@@ -38,7 +38,7 @@ def token_required(
                 abort(401, description=f"Token parsing failed: {str(e)}")
 
             try:
-                validator.validate(payload)
+                validator.validate(payload.to_dict())
             except Exception as e:
                 abort(401, description=f"Token validation failed: {str(e)}")
 
