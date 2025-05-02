@@ -26,10 +26,7 @@ class DefaultJWTParser(TokenParser):
 
     def parse(self, token: str) -> ParsedToken:
         self.__get_key__()
-        print("secret_key: " + self.secret_key)
-        print("algorithms: " + (str) (self.algorithms))
-        print("token     : " + token)
-        
+
         try:
             claims = jwt.decode(
                 token,
@@ -43,7 +40,7 @@ class DefaultJWTParser(TokenParser):
                     "verify_signature": True,
                 },
             )
-            print(claims)
+
             return ParsedToken(claims)
         except ExpiredSignatureError:
             raise Exception("Token has expired")
