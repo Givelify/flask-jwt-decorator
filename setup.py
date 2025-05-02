@@ -7,6 +7,7 @@ setup(
     install_requires=[
         "Flask>=3.1.0",
         "PyJWT>=2.10.1",
+        "cryptography>=44.0.2"
     ],
     description="Pluggable JWT authentication middleware for Flask",
     author="Me",
