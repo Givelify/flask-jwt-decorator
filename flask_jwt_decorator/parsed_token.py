@@ -23,9 +23,16 @@ class ParsedToken:
 
     def _parse_time(self, claim: str) -> Optional[datetime]:
         raw = self._claims.get(claim)
-        value = self._format_string(raw)
-        return self._format_time(value)
-
+        # value = self._format_string(raw)
+        # return self._format_time(raw)
+        return self._convert_to_datetime(raw)
+    
+    def _convert_to_datetime(self, value):
+        if (value):
+            return datetime.fromtimestamp(value)
+        else:
+            return value
+    
     def _format_string(self, value: Any) -> Optional[str]:
         if value is None:
             return None

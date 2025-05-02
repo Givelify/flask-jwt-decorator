@@ -16,3 +16,4 @@ class DefaultPayloadInjector(PayloadInjector):
         #TODO - consult php if its doing anything by default.
         # Consumers of this library should definitely be creating their own
         # Payload injector for passing user into request object
+        pass

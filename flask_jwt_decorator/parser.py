@@ -16,12 +16,17 @@ class TokenParser(ABC):
 class DefaultJWTParser(TokenParser):
 
     def __init__(self):
+        pass
+
+    def __get_key__(self):
         self.secret_key = current_app.config["JWT_SECRET_KEY"]
         if not self.secret_key:
             raise ValueError("JWT_SECRET_KEY is required in the configuration")
-        self.algorithms = current_app.config.get("JWT_ALGORITHMS", ["HS256"])
+        self.algorithms = current_app.config.get("JWT_ALGORITHMS", ["RS256"])
 
     def parse(self, token: str) -> ParsedToken:
+        self.__get_key__()
+
         try:
             claims = jwt.decode(
                 token,
@@ -31,8 +36,11 @@ class DefaultJWTParser(TokenParser):
                     "verify_exp": True,
                     "verify_nbf": True,
                     "verify_iat": False,
+                    "verify_aud": False, 
+                    "verify_signature": True,
                 },
             )
+
             return ParsedToken(claims)
         except ExpiredSignatureError:
             raise Exception("Token has expired")
