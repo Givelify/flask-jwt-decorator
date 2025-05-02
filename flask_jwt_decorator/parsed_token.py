@@ -28,7 +28,10 @@ class ParsedToken:
         return self._convert_to_datetime(raw)
     
     def _convert_to_datetime(self, value):
-        return datetime.fromtimestamp(value)
+        if (value):
+            return datetime.fromtimestamp(value)
+        else:
+            return value
     
     def _format_string(self, value: Any) -> Optional[str]:
         if value is None:

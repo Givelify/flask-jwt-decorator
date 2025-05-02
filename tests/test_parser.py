@@ -3,6 +3,7 @@ from flask import Flask
 # Assuming your class is in a file named 'my_module.py'
 from flask_jwt_decorator import parser
 from flask_jwt_decorator import parsed_token
+import jwt
 
 class TestDefaultJWTParser(unittest.TestCase):
 
@@ -10,36 +11,27 @@ class TestDefaultJWTParser(unittest.TestCase):
         # Create a test Flask app
         self.app = Flask(__name__)
         # Configure the app for testing (example)
-        self.app.config['JWT_SECRET_KEY'] = """-----BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5z4JITLvn8OnZ3euy+fg
-qkta2C79EvuF70L5rSTZmHX/vDmgji/rS0A6f6UrHaVSGKyIYzMxekOWm93nEiJA
-Kk5DvHntlt5abH/dgejP/kDZUMKB1GJ9Oa4jpyLVG+JdkrUSCUF0bHqwbe1z46nq
-YS5jp6epIeBRkOyN2uch/pDEp1EoyozilALZYXjbyUVR6/dt3TDeocRTwmnWqPW5
-qWOQO3KPx0xV4aCrhahb1GqiN0PRRgzLZNK1JNDmJPKFfXu+eNfDB8IwE2sxAbrD
-FX8kvQsbv7zwF9E24hxhIap2qu/tXc5IpAiCVNGm3BBDHgJw+6v2M6VqTVYA7/ky
-QXZnEvh64NuqKqKxDWX/aG7RRYqn3JjKzsyslbSdgQjGtpaA7f6/5ktNREi7vRlx
-dS0CeMTBUVjULbLet1BVW3gzt6164UYWF15ujStZMRRCWjKIxR8zInSw8CHEhddF
-ixj0cXO4WcjmwyvyaepAOmcHirx6AlHyCvizWwBz/aQBtgHGca9smc4bIjA1rn9r
-bfOhBrM29nORWBXgNd81EdgakaNLJ8Ps/GNbilPlpdAOZ9q7QOrOiOlEf2fgERQB
-/w+Iri8jwTtONaHb/vdZO4Z1necLDo+1lCSoxf2iSLbkBlXSb2D7oJM4srHyFMN8
-m6jgQ0l4WfT+2b0WUHVXX7UCAwEAAQ==
------END PUBLIC KEY-----"""
+        self.private_key = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAwhvqCC+37A+UXgcvDl+7nbVjDI3QErdZBkI1VypVBMkKKWHM\nNLMdHk0bIKL+1aDYTRRsCKBy9ZmSSX1pwQlO/3+gRs/MWG27gdRNtf57uLk1+lQI\n6hBDozuyBR0YayQDIx6VsmpBn3Y8LS13p4pTBvirlsdX+jXrbOEaQphn0OdQo0WD\noOwwsPCNCKoIMbUOtUCowvjesFXlWkwG1zeMzlD1aDDS478PDZdckPjT96ICzqe4\nO1Ok6fRGnor2UTmuPy0f1tI0F7Ol5DHAD6pZbkhB70aTBuWDGLDR0iLenzyQecmD\n4aU19r1XC9AHsVbQzxHrP8FveZGlV/nJOBJwFwIDAQABAoIBAFCVFBA39yvJv/dV\nFiTqe1HahnckvFe4w/2EKO65xTfKWiyZzBOotBLrQbLH1/FJ5+H/82WVboQlMATQ\nSsH3olMRYbFj/NpNG8WnJGfEcQpb4Vu93UGGZP3z/1B+Jq/78E15Gf5KfFm91PeQ\nY5crJpLDU0CyGwTls4ms3aD98kNXuxhCGVbje5lCARizNKfm/+2qsnTYfKnAzN+n\nnm0WCjcHmvGYO8kGHWbFWMWvIlkoZ5YubSX2raNeg+YdMJUHz2ej1ocfW0A8/tmL\nwtFoBSuBe1Z2ykhX4t6mRHp0airhyc+MO0bIlW61vU/cPGPos16PoS7/V08S7ZED\nX64rkyECgYEA4iqeJZqny/PjOcYRuVOHBU9nEbsr2VJIf34/I9hta/mRq8hPxOdD\n/7ES/ZTZynTMnOdKht19Fi73Sf28NYE83y5WjGJV/JNj5uq2mLR7t2R0ZV8uK8tU\n4RR6b2bHBbhVLXZ9gqWtu9bWtsxWOkG1bs0iONgD3k5oZCXp+IWuklECgYEA27bA\n7UW+iBeB/2z4x1p/0wY+whBOtIUiZy6YCAOv/HtqppsUJM+W9GeaiMpPHlwDUWxr\n4xr6GbJSHrspkMtkX5bL9e7+9zBguqG5SiQVIzuues9Jio3ZHG1N2aNrr87+wMiB\nxX6Cyi0x1asmsmIBO7MdP/tSNB2ebr8qM6/6mecCgYBA82ZJfFm1+8uEuvo6E9/R\nyZTbBbq5BaVmX9Y4MB50hM6t26/050mi87J1err1Jofgg5fmlVMn/MLtz92uK/hU\nS9V1KYRyLc3h8gQQZLym1UWMG0KCNzmgDiZ/Oa/sV5y2mrG+xF/ZcwBkrNgSkO5O\n7MBoPLkXrcLTCARiZ9nTkQKBgQCsaBGnnkzOObQWnIny1L7s9j+UxHseCEJguR0v\nXMVh1+5uYc5CvGp1yj5nDGldJ1KrN+rIwMh0FYt+9dq99fwDTi8qAqoridi9Wl4t\nIXc8uH5HfBT3FivBtLucBjJgOIuK90ttj8JNp30tbynkXCcfk4NmS23L21oRCQyy\nlmqNDQKBgQDRvzEB26isJBr7/fwS0QbuIlgzEZ9T3ZkrGTFQNfUJZWcUllYI0ptv\ny7ShHOqyvjsC3LPrKGyEjeufaM5J8EFrqwtx6UB/tkGJ2bmd1YwOWFHvfHgHCZLP\n34ZNURCvxRV9ZojS1zmDRBJrSo7+/K0t28hXbiaTOjJA18XAyyWmGg==\n-----END RSA PRIVATE KEY-----\n"
+
+        self.public_key = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwhvqCC+37A+UXgcvDl+7\nnbVjDI3QErdZBkI1VypVBMkKKWHMNLMdHk0bIKL+1aDYTRRsCKBy9ZmSSX1pwQlO\n/3+gRs/MWG27gdRNtf57uLk1+lQI6hBDozuyBR0YayQDIx6VsmpBn3Y8LS13p4pT\nBvirlsdX+jXrbOEaQphn0OdQo0WDoOwwsPCNCKoIMbUOtUCowvjesFXlWkwG1zeM\nzlD1aDDS478PDZdckPjT96ICzqe4O1Ok6fRGnor2UTmuPy0f1tI0F7Ol5DHAD6pZ\nbkhB70aTBuWDGLDR0iLenzyQecmD4aU19r1XC9AHsVbQzxHrP8FveZGlV/nJOBJw\nFwIDAQAB\n-----END PUBLIC KEY-----\n"
+        self.algorithm = "RS256"
+
+        self.app.config['JWT_SECRET_KEY'] = self.public_key
 
     def test_my_method(self):
       with self.app.app_context():
         # Instantiate your class within the context
         my_instance = parser.DefaultJWTParser()
         # Call a method that uses current_app
-        token='eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxNTg4ODAwMzA0IiwianRpIjoiZTJiNWUzNmI0NTFjMWQ2YzBiY2I3NmEwMmU1ODk5NDZmYzQ0OGVjMzEzNDdjOWQ5ZjlkYzczYzQ1ZDJkMzg3ZmUwZGI5M2I3ZmZkZWE3ZTAiLCJpYXQiOjE3NDYxMTkwNTAuMTgwMDc1LCJuYmYiOjE3NDYxMTkwNTAuMTgwMDc3LCJleHAiOjE3NDYyMDU0NTAuMTY4NjY2LCJzdWIiOiIxYjIxODFjYS0yOWVhLTRmOGItYTc5MS02ZTc4YTNkNzJiZTUiLCJzY29wZXMiOlsiZG9ub3IiXX0.C67ueajuMH2pkklgMMhp8RF1T_rwgJQz5j_FXuIQ6t4Zl04pBnN_wcDa2aeXx1-nFGYc0_I1jbvC6XqVxaNkR-1ThkSLwCoEGMNhS8Z1DvF8ZNZLuNz9QQOyUfobPhqGwH9FRil2lobA3Zi7vAU-gBInsOSLKI6hWvABofUHCc0eZS9WETcPV75H8iK5snk8m0ijsDUHcxsjbP1SVp1Wi4mBHRUQriFel_jO64qhhddn4gB75GnjRjiQnhIdAReON44IBupcR-WdA1vivHGxIoVQrbpeGCcWlOfVPu5BSTbttTMdpOZYSSLcFZwvcFbZa_iStTVPGXE4MUNHVV8Mz7HOUq59ZYtsPCJpnk370Bqb4wP5zj-jqPAsowB-Rc6sXbAva2LVt1QR928lEm6HJf3cOz055sHrTAILWFGUap1fDMuhMhO_8-f0L2yNgHYWhVUIsMOeD3ZiQSATgqsjNO_zsGV6h81xva1UcTIVxfpgKpIpszm0xpBq7rAwvcbo2jFnHODzmjgOBxoNcbC98j0nrIwiWvmcu3r2-eEzGrg4G3d-VRuSjwuroWTNrmlj1wdJ2ViGKVsgYUTOp22dZ6RTyDxybaIpG4oDNGdq0Dp3-uuuPyfUAI-phoGxLn8CN0d3WnMylNB9Y1f0xUmk4apeypDXY1G4QhyDiZr1dqs'
-        expected_claim={'aud': '1588800304', 'jti': 'e2b5e36b451c1d6c0bcb76a02e589946fc448ec31347c9d9f9dc73c45d2d387fe0db93b7ffdea7e0', 'iat': 1746119050.180075, 'nbf': 1746119050.180077, 'exp': 1746205450.168666, 'sub': '1b2181ca-29ea-4f8b-a791-6e78a3d72be5', 'scopes': ['donor']}
-        expected_token = parsed_token.ParsedToken(expected_claim)
+        payload = {"some": "payload"}
+
+        encoded = jwt.encode(payload, self.private_key, algorithm=self.algorithm)
 
         # Assert the expected result
 
-        result = my_instance.parse(token)
+        result = my_instance.parse(encoded)
 
-        print(result)
-        self.assertEqual(result.to_dict(), expected_token.to_dict())
+        self.assertEqual(result.to_dict(), payload)
 
 
 if __name__ == '__main__':
